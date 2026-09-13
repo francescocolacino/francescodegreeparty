@@ -1,5 +1,16 @@
 require('dotenv').config();
 
+// Alcune piattaforme (Railway, Render, ...) risolvono host esterni come
+// smtp.gmail.com anche su IPv6 ma non hanno una rotta IPv6 in uscita
+// funzionante: senza questa impostazione le connessioni SMTP falliscono con
+// "connect ENETUNREACH" sull'indirizzo IPv6 invece di usare l'IPv4 valido.
+const dns = require('dns');
+try {
+    dns.setDefaultResultOrder('ipv4first');
+} catch (err) {
+    // Node < 17: opzione non disponibile, si ignora (ambiente locale comunque non affetto)
+}
+
 const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
