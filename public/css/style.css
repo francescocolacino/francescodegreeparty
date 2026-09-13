@@ -28,6 +28,13 @@
     box-sizing: border-box;
 }
 
+/* Alcune classi qui sotto impostano "display" in modo esplicito (flex/grid)
+   per il proprio stato visibile: senza questa regola quel valore vincerebbe
+   sempre sull'attributo HTML "hidden", mostrando l'elemento comunque. */
+[hidden] {
+    display: none !important;
+}
+
 html {
     -webkit-text-size-adjust: 100%;
 }
