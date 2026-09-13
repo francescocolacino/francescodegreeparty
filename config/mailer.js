@@ -7,11 +7,22 @@ let transporter = null;
 
 if (gmailUser && gmailPass) {
     transporter = nodemailer.createTransport({
-        service: 'gmail',
+        // Porta 587 con STARTTLS invece della scorciatoia "service: gmail"
+        // (che userebbe la 465 con TLS implicito): alcune piattaforme cloud
+        // filtrano la 465 in uscita, mentre la 587 e' quasi sempre permessa.
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
         auth: {
             user: gmailUser,
             pass: gmailPass
-        }
+        },
+        // Timeout brevi: se la rete blocca/droppa i pacchetti in silenzio,
+        // l'invio deve fallire in pochi secondi invece di restare appeso.
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000
     });
 } else {
     console.warn('[mailer] GMAIL_USER o GOOGLE_APP_PASSWORD non impostate: l\'invio email e\' disabilitato.');

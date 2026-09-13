@@ -125,9 +125,12 @@ router.post('/', validateRsvpBody, async (req, res) => {
         client.release();
     }
 
-    // Il salvataggio e' gia' andato a buon fine (COMMIT eseguito).
-    // L'eventuale fallimento dell'invio email NON deve influenzare la risposta.
-    const emailResult = await sendConfirmationEmail({
+    // Il salvataggio e' gia' andato a buon fine (COMMIT eseguito). L'invio
+    // dell'email NON deve far attendere il client: viene avviato qui ma non
+    // "atteso" nella risposta, cosi' un SMTP lento o non raggiungibile non
+    // fa restare il form in caricamento. Un eventuale fallimento viene solo
+    // loggato: l'RSVP resta comunque valido.
+    sendConfirmationEmail({
         id: rsvpId,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -137,11 +140,13 @@ router.post('/', validateRsvpBody, async (req, res) => {
         attendance: data.attendance,
         hasGuest: data.hasGuest,
         guest: data.guest
+    }).then((emailResult) => {
+        if (!emailResult.sent) {
+            console.warn(`[rsvp] RSVP #${rsvpId} salvato correttamente ma l'email di conferma non e' partita (${emailResult.reason}).`);
+        }
+    }).catch((err) => {
+        console.error(`[rsvp] Errore inatteso durante l'invio email per rsvp #${rsvpId}:`, err.message);
     });
-
-    if (!emailResult.sent) {
-        console.warn(`[rsvp] RSVP #${rsvpId} salvato correttamente ma l'email di conferma non e' partita (${emailResult.reason}).`);
-    }
 
     return res.status(201).json({
         success: true,
