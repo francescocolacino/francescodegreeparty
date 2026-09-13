@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Pannello Admin — Festa di Laurea</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+
+<div id="loading-view" class="loading-text">Caricamento...</div>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="login-view" class="login-wrap" hidden>
+    <div class="login-card">
+        <p class="eyebrow">Pannello riservato</p>
+        <h1>Accesso amministratore</h1>
+        <form id="login-form" autocomplete="on">
+            <div class="field">
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username" name="username" autocomplete="username" required>
+            </div>
+            <div class="field">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-submit" id="login-submit">
+                <span class="btn-text">Accedi</span>
+                <span class="btn-loader" hidden>Accesso in corso...</span>
+            </button>
+            <p class="login-error" id="login-error" role="alert" aria-live="polite"></p>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboard-view" class="admin-shell" hidden>
+    <header class="admin-topbar">
+        <div class="brand"><span aria-hidden="true">🎓</span> Festa di Laurea <span class="brand-gold">— Admin</span></div>
+        <button type="button" id="logout-btn">Esci</button>
+    </header>
+
+    <main class="admin-main">
+
+        <section aria-label="Statistiche adesioni">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total">—</span>
+                    <span class="stat-label">RSVP ricevuti</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-present">—</span>
+                    <span class="stat-label">Presenti totali</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-main-present">—</span>
+                    <span class="stat-label">Invitati presenti</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-guests">—</span>
+                    <span class="stat-label">Accompagnatori</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-absent">—</span>
+                    <span class="stat-label">Assenti</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-section" aria-label="Elenco adesioni">
+            <h2>Elenco adesioni</h2>
+            <p class="section-subtitle">Ordinate per data di adesione (dalla prima ricevuta).</p>
+
+            <div id="rsvp-loading" class="loading-text">Caricamento adesioni...</div>
+            <p id="rsvp-empty" class="empty-state" hidden>Nessuna adesione ricevuta finora.</p>
+
+            <div class="table-wrap" id="rsvp-table-wrap" hidden>
+                <table class="rsvp-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Data</th>
+                            <th>Nome</th>
+                            <th>Cognome</th>
+                            <th>Presenza</th>
+                            <th>Telefono</th>
+                            <th>Email</th>
+                            <th>Note</th>
+                            <th>Accompagnatore</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rsvp-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="rsvp-cards" id="rsvp-cards" hidden></div>
+        </section>
+
+        <section class="admin-section" aria-label="Invia comunicazione">
+            <h2>Invia comunicazione</h2>
+            <p class="section-subtitle">Invia un aggiornamento via email agli invitati. Ogni email viene inviata singolarmente.</p>
+
+            <form id="campaign-form">
+                <div class="form-row">
+                    <label for="campaign-filter">Destinatari</label>
+                    <select id="campaign-filter" name="recipientFilter">
+                        <option value="attendees" selected>Solo partecipanti</option>
+                        <option value="all">Tutti gli RSVP</option>
+                        <option value="absent">Solo assenti</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="campaign-subject">Oggetto</label>
+                    <input type="text" id="campaign-subject" name="subject" maxlength="200" required>
+                </div>
+                <div class="form-row">
+                    <label for="campaign-message">Messaggio</label>
+                    <textarea id="campaign-message" name="message" maxlength="5000" required></textarea>
+                    <p class="char-count"><span id="campaign-charcount">0</span> / 5000</p>
+                </div>
+                <button type="submit" class="btn btn-primary" id="campaign-submit">
+                    <span class="btn-text">Invia comunicazione</span>
+                    <span class="btn-loader" hidden>Invio in corso...</span>
+                </button>
+                <div id="campaign-result" class="campaign-result" hidden></div>
+            </form>
+        </section>
+
+        <section class="admin-section" aria-label="Storico comunicazioni">
+            <h2>Storico comunicazioni</h2>
+            <div id="history-loading" class="loading-text">Caricamento storico...</div>
+            <p id="history-empty" class="empty-state" hidden>Nessuna comunicazione inviata finora.</p>
+            <div class="history-list" id="history-list" hidden></div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ==================== MODAL CONFERMA INVIO ==================== -->
+<div class="modal-overlay" id="confirm-modal" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+    <div class="modal-box">
+        <h3 id="confirm-modal-title">Confermi l'invio?</h3>
+        <p id="confirm-modal-text"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="confirm-modal-cancel">Annulla</button>
+            <button type="button" class="btn btn-primary" id="confirm-modal-confirm">Conferma invio</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

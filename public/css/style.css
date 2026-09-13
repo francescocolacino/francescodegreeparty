@@ -1,0 +1,932 @@
+/* =====================================================================
+   Festa di Laurea — stile condiviso (pagina pubblica + pannello admin)
+   Palette: bordeaux scuro, nero, crema, dettagli oro
+   ===================================================================== */
+
+:root {
+    --bordeaux: #5c1a2b;
+    --bordeaux-dark: #3e0f1c;
+    --bordeaux-light: #7c2c40;
+    --black: #1c1614;
+    --cream: #faf6ee;
+    --cream-dark: #f1e9d8;
+    --gold: #c9a24b;
+    --gold-light: #e2c07f;
+    --text: #2b2320;
+    --text-muted: #7c6f61;
+    --danger: #a13a2f;
+    --success: #2f6b4f;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow-soft: 0 20px 50px -20px rgba(28, 22, 20, 0.35);
+    --font-serif: Georgia, 'Times New Roman', Times, serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-sans);
+    color: var(--text);
+    background-color: var(--black);
+    line-height: 1.5;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-serif);
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+a {
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------
+   Sfondo decorativo pagina pubblica
+   -------------------------------------------------------------------- */
+.bg-decor {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 15% 15%, rgba(201, 162, 75, 0.16), transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(124, 44, 64, 0.35), transparent 50%),
+        radial-gradient(circle at 50% 100%, rgba(201, 162, 75, 0.10), transparent 55%),
+        linear-gradient(160deg, var(--black) 0%, var(--bordeaux-dark) 55%, var(--black) 100%);
+}
+
+.page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px 64px;
+}
+
+@media (min-width: 640px) {
+    .page {
+        padding: 72px 24px 96px;
+    }
+}
+
+/* --------------------------------------------------------------------
+   Card invito
+   -------------------------------------------------------------------- */
+.invite-card {
+    width: 100%;
+    max-width: 560px;
+    background: linear-gradient(180deg, #fffdf9 0%, var(--cream) 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 40px 24px;
+    border: 1px solid rgba(201, 162, 75, 0.35);
+    animation: card-rise 0.7s ease both;
+}
+
+@media (min-width: 640px) {
+    .invite-card {
+        padding: 56px 48px;
+    }
+}
+
+@keyframes card-rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.invite-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.eyebrow {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--bordeaux);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.invite-header h1 {
+    font-size: 34px;
+    color: var(--black);
+    margin-bottom: 14px;
+    line-height: 1.15;
+}
+
+@media (min-width: 640px) {
+    .invite-header h1 {
+        font-size: 42px;
+    }
+}
+
+.invite-lead {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 38ch;
+    margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------
+   Dettagli evento
+   -------------------------------------------------------------------- */
+.event-details {
+    background: var(--cream-dark);
+    border: 1px solid rgba(201, 162, 75, 0.4);
+    border-radius: var(--radius-md);
+    padding: 22px 20px;
+    margin-bottom: 36px;
+    text-align: center;
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 0 0 16px;
+}
+
+@media (min-width: 480px) {
+    .detail-list {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.detail-row dt {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.detail-row dd {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--black);
+}
+
+.event-note {
+    font-size: 13.5px;
+    color: var(--bordeaux);
+    font-style: italic;
+    margin-bottom: 16px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 13px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--bordeaux);
+    border: 2px solid var(--gold);
+}
+
+.btn-outline:hover {
+    background: rgba(201, 162, 75, 0.12);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--bordeaux), var(--bordeaux-dark));
+    color: var(--cream);
+    box-shadow: 0 12px 24px -10px rgba(92, 26, 43, 0.6);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 16px 28px -10px rgba(92, 26, 43, 0.7);
+}
+
+.btn-primary:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-submit {
+    width: 100%;
+    margin-top: 8px;
+    padding: 16px 24px;
+    font-size: 16px;
+}
+
+/* --------------------------------------------------------------------
+   RSVP form
+   -------------------------------------------------------------------- */
+.rsvp-section h2 {
+    font-size: 22px;
+    color: var(--black);
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.choice-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0 0 24px;
+}
+
+.choice-fieldset legend {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--black);
+    padding: 0;
+    margin-bottom: 12px;
+    text-align: center;
+    width: 100%;
+}
+
+.choice-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.choice-group-inline {
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.choice-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 12px;
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(28, 22, 20, 0.12);
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--text);
+}
+
+.choice-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -12px rgba(28, 22, 20, 0.35);
+}
+
+.choice-card input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.choice-icon {
+    font-size: 26px;
+    line-height: 1;
+}
+
+.choice-card:has(input:checked),
+.choice-card.is-selected {
+    border-color: var(--gold);
+    background: linear-gradient(160deg, #fff, var(--cream-dark));
+    box-shadow: 0 12px 22px -12px rgba(201, 162, 75, 0.55);
+}
+
+.choice-card:has(input:checked)::after,
+.choice-card.is-selected::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.choice-card:has(input:focus-visible) {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.field-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 6px;
+    min-height: 1px;
+}
+
+.field-error:empty {
+    display: none;
+}
+
+.reveal-block {
+    animation: reveal-in 0.35s ease both;
+}
+
+@keyframes reveal-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (min-width: 480px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.form-grid .field {
+    margin-bottom: 0;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+    margin-bottom: 6px;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid rgba(28, 22, 20, 0.18);
+    background: #fff;
+    font-size: 15px;
+    font-family: var(--font-sans);
+    color: var(--text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field textarea {
+    resize: vertical;
+    min-height: 84px;
+}
+
+.field input:focus,
+.field textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 4px rgba(201, 162, 75, 0.18);
+    outline: none;
+}
+
+.field input.invalid,
+.field textarea.invalid {
+    border-color: var(--danger);
+}
+
+.guest-title {
+    font-size: 17px;
+    color: var(--black);
+    margin: 4px 0 16px;
+}
+
+/* --------------------------------------------------------------------
+   Loader / risultato
+   -------------------------------------------------------------------- */
+.btn-submit .btn-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-submit .btn-loader::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(250, 246, 238, 0.4);
+    border-top-color: var(--cream);
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.result-card {
+    text-align: center;
+    padding: 20px 8px 4px;
+    animation: reveal-in 0.4s ease both;
+}
+
+.result-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.result-card h2 {
+    font-size: 24px;
+    color: var(--black);
+    margin-bottom: 10px;
+}
+
+.result-card p {
+    color: var(--text-muted);
+    font-size: 15.5px;
+    max-width: 42ch;
+    margin: 0 auto 6px;
+}
+
+.result-card.is-error h2 {
+    color: var(--danger);
+}
+
+/* =====================================================================
+   PANNELLO ADMIN
+   ===================================================================== */
+
+body.admin-body {
+    background: var(--cream);
+}
+
+.admin-shell {
+    min-height: 100vh;
+}
+
+.admin-topbar {
+    background: linear-gradient(135deg, var(--bordeaux), var(--bordeaux-dark));
+    color: var(--cream);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-topbar .brand {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-topbar .brand-gold {
+    color: var(--gold-light);
+}
+
+#logout-btn {
+    background: rgba(250, 246, 238, 0.12);
+    color: var(--cream);
+    border: 1px solid rgba(250, 246, 238, 0.35);
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background: rgba(250, 246, 238, 0.22);
+}
+
+.admin-main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 16px 64px;
+}
+
+@media (min-width: 768px) {
+    .admin-main {
+        padding: 36px 32px 72px;
+    }
+}
+
+/* Login */
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(201, 162, 75, 0.15), transparent 45%),
+        linear-gradient(160deg, var(--black), var(--bordeaux-dark));
+    padding: 24px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 36px 28px;
+    text-align: center;
+    animation: card-rise 0.5s ease both;
+}
+
+.login-card h1 {
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: var(--black);
+}
+
+.login-card .eyebrow {
+    margin-bottom: 14px;
+}
+
+.login-card form {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.login-error {
+    color: var(--danger);
+    font-size: 13.5px;
+    min-height: 18px;
+    margin-top: 10px;
+}
+
+/* Stat cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+@media (min-width: 700px) {
+    .stats-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid rgba(201, 162, 75, 0.3);
+    border-radius: var(--radius-md);
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 8px 18px -14px rgba(28, 22, 20, 0.4);
+}
+
+.stat-card .stat-value {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    color: var(--bordeaux);
+    display: block;
+}
+
+.stat-card .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.admin-section {
+    background: #fff;
+    border: 1px solid rgba(201, 162, 75, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px;
+    margin-bottom: 28px;
+}
+
+@media (min-width: 640px) {
+    .admin-section {
+        padding: 28px 26px;
+    }
+}
+
+.admin-section h2 {
+    font-size: 19px;
+    margin-bottom: 4px;
+    color: var(--black);
+}
+
+.section-subtitle {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin-bottom: 18px;
+}
+
+/* Tabella adesioni (desktop) */
+.table-wrap {
+    overflow-x: auto;
+}
+
+table.rsvp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+table.rsvp-table th,
+table.rsvp-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(28, 22, 20, 0.08);
+    white-space: nowrap;
+}
+
+table.rsvp-table th {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+}
+
+table.rsvp-table td.wrap {
+    white-space: normal;
+    max-width: 220px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+.badge-present {
+    background: rgba(47, 107, 79, 0.14);
+    color: var(--success);
+}
+
+.badge-absent {
+    background: rgba(161, 58, 47, 0.12);
+    color: var(--danger);
+}
+
+.badge-guest {
+    background: rgba(201, 162, 75, 0.2);
+    color: #8a6a1f;
+    margin-left: 6px;
+}
+
+.badge-guest-block {
+    display: inline-block;
+    margin: 10px 0 6px;
+}
+
+.expand-btn {
+    background: none;
+    border: 1px solid rgba(28, 22, 20, 0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text);
+    margin-left: 8px;
+}
+
+.guest-detail-row td {
+    background: var(--cream-dark);
+}
+
+.guest-detail-box {
+    padding: 10px 4px;
+    font-size: 13.5px;
+    line-height: 1.7;
+}
+
+/* Cards mobile per la tabella */
+.rsvp-cards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rsvp-card {
+    border: 1px solid rgba(28, 22, 20, 0.12);
+    border-radius: var(--radius-md);
+    padding: 14px;
+}
+
+.rsvp-card .rsvp-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.rsvp-card .rsvp-card-name {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.rsvp-card .rsvp-card-num {
+    color: var(--text-muted);
+    font-size: 12.5px;
+}
+
+.rsvp-card dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 10px;
+    font-size: 13.5px;
+}
+
+.rsvp-card dt {
+    color: var(--text-muted);
+}
+
+.rsvp-card dd {
+    margin: 0;
+}
+
+@media (max-width: 760px) {
+    .table-wrap { display: none; }
+    .rsvp-cards { display: flex; }
+}
+
+/* Comunicazioni */
+.form-row {
+    margin-bottom: 16px;
+}
+
+.form-row label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--black);
+}
+
+.form-row select,
+.form-row input[type="text"],
+.form-row textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid rgba(28, 22, 20, 0.18);
+    font-size: 14.5px;
+    font-family: var(--font-sans);
+    background: #fff;
+}
+
+.form-row textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.char-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 4px;
+}
+
+.campaign-result {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--cream-dark);
+    font-size: 14px;
+}
+
+.campaign-result.is-error {
+    background: rgba(161, 58, 47, 0.1);
+    color: var(--danger);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    border: 1px solid rgba(28, 22, 20, 0.1);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13.5px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.history-item .history-subject {
+    font-weight: 700;
+}
+
+.history-item .history-meta {
+    color: var(--text-muted);
+}
+
+.empty-state {
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Modal di conferma invio */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 22, 20, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 26px 24px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    animation: card-rise 0.25s ease both;
+}
+
+.modal-box h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: var(--black);
+}
+
+.modal-box p {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-secondary {
+    background: var(--cream-dark);
+    color: var(--text);
+}
+
+.loading-text {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 24px 0;
+}

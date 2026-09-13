@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Invito e conferma di presenza per la festa di laurea.">
+<meta name="color-scheme" content="light">
+<title>Festa di Laurea 🎓</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="bg-decor" aria-hidden="true"></div>
+
+<main class="page">
+    <div class="invite-card" id="invite-card">
+
+        <header class="invite-header">
+            <p class="eyebrow">Laurea in Ingegneria Informatica</p>
+            <h1>Francesco si laurea <span aria-hidden="true">🎓</span></h1>
+            <p class="invite-lead">Sei ufficialmente invitato alla mia festa di laurea.</p>
+        </header>
+
+        <section class="event-details" aria-label="Dettagli evento">
+            <dl class="detail-list">
+                <div class="detail-row">
+                    <dt>Data</dt>
+                    <dd id="event-date">—</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Ora</dt>
+                    <dd id="event-time">—</dd>
+                </div>
+                <div class="detail-row">
+                    <dt>Location</dt>
+                    <dd id="event-location">—</dd>
+                </div>
+                <div class="detail-row" id="event-address-row" hidden>
+                    <dt>Indirizzo</dt>
+                    <dd id="event-address">—</dd>
+                </div>
+            </dl>
+            <p class="event-note" id="event-note" hidden></p>
+            <a id="maps-link" class="btn btn-outline" href="#" target="_blank" rel="noopener noreferrer" hidden>
+                Apri su Maps
+            </a>
+        </section>
+
+        <section class="rsvp-section" id="rsvp-section" aria-labelledby="rsvp-heading">
+            <h2 id="rsvp-heading">Conferma la tua presenza</h2>
+
+            <p id="form-status" class="visually-hidden" role="status" aria-live="polite"></p>
+
+            <form id="rsvp-form" novalidate autocomplete="on">
+
+                <fieldset class="choice-fieldset">
+                    <legend>Sarai presente alla festa?</legend>
+                    <div class="choice-group" data-error-for="attendance">
+                        <label class="choice-card choice-yes" for="attendance-yes">
+                            <input type="radio" id="attendance-yes" name="attendance" value="yes" required>
+                            <span class="choice-icon" aria-hidden="true">🎉</span>
+                            <span class="choice-label">Sì, ci sarò</span>
+                        </label>
+                        <label class="choice-card choice-no" for="attendance-no">
+                            <input type="radio" id="attendance-no" name="attendance" value="no" required>
+                            <span class="choice-icon" aria-hidden="true">😔</span>
+                            <span class="choice-label">No, non potrò esserci</span>
+                        </label>
+                    </div>
+                    <p class="field-error" id="error-attendance" aria-live="polite"></p>
+                </fieldset>
+
+                <div class="reveal-block" id="personal-fields" hidden>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="firstName">Nome</label>
+                            <input type="text" id="firstName" name="firstName" autocomplete="given-name" maxlength="100" required>
+                            <p class="field-error" id="error-firstName" aria-live="polite"></p>
+                        </div>
+                        <div class="field">
+                            <label for="lastName">Cognome</label>
+                            <input type="text" id="lastName" name="lastName" autocomplete="family-name" maxlength="100" required>
+                            <p class="field-error" id="error-lastName" aria-live="polite"></p>
+                        </div>
+                        <div class="field">
+                            <label for="phone">Numero di telefono</label>
+                            <input type="tel" id="phone" name="phone" inputmode="tel" autocomplete="tel" maxlength="30" required>
+                            <p class="field-error" id="error-phone" aria-live="polite"></p>
+                        </div>
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" autocomplete="email" maxlength="255" required>
+                            <p class="field-error" id="error-email" aria-live="polite"></p>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="notes">Note, allergie e intolleranze</label>
+                        <textarea id="notes" name="notes" rows="3" maxlength="1000" required placeholder="Scrivi &quot;Nessuna&quot; se non hai allergie, intolleranze o comunicazioni particolari."></textarea>
+                        <p class="field-error" id="error-notes" aria-live="polite"></p>
+                    </div>
+
+                    <fieldset class="choice-fieldset" id="guest-question" hidden>
+                        <legend>Porterai con te il tuo fidanzato, la tua fidanzata o un accompagnatore?</legend>
+                        <div class="choice-group choice-group-inline">
+                            <label class="choice-card choice-yes" for="guest-yes">
+                                <input type="radio" id="guest-yes" name="hasGuest" value="yes">
+                                <span class="choice-icon" aria-hidden="true">💑</span>
+                                <span class="choice-label">Sì</span>
+                            </label>
+                            <label class="choice-card choice-no" for="guest-no">
+                                <input type="radio" id="guest-no" name="hasGuest" value="no">
+                                <span class="choice-icon" aria-hidden="true">🙅</span>
+                                <span class="choice-label">No</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <div class="reveal-block" id="guest-fields" hidden>
+                        <h3 class="guest-title">Dati del tuo accompagnatore</h3>
+                        <p class="field-error" id="error-guestGeneral" aria-live="polite"></p>
+
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="guestfirstName">Nome</label>
+                                <input type="text" id="guestfirstName" name="guestFirstName" autocomplete="given-name" maxlength="100">
+                                <p class="field-error" id="error-guestfirstName" aria-live="polite"></p>
+                            </div>
+                            <div class="field">
+                                <label for="guestlastName">Cognome</label>
+                                <input type="text" id="guestlastName" name="guestLastName" autocomplete="family-name" maxlength="100">
+                                <p class="field-error" id="error-guestlastName" aria-live="polite"></p>
+                            </div>
+                            <div class="field">
+                                <label for="guestphone">Numero di telefono</label>
+                                <input type="tel" id="guestphone" name="guestPhone" inputmode="tel" autocomplete="tel" maxlength="30">
+                                <p class="field-error" id="error-guestphone" aria-live="polite"></p>
+                            </div>
+                            <div class="field">
+                                <label for="guestemail">Email</label>
+                                <input type="email" id="guestemail" name="guestEmail" autocomplete="email" maxlength="255">
+                                <p class="field-error" id="error-guestemail" aria-live="polite"></p>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="guestnotes">Note, allergie e intolleranze</label>
+                            <textarea id="guestnotes" name="guestNotes" rows="3" maxlength="1000" placeholder="Scrivi &quot;Nessuna&quot; se non ci sono allergie, intolleranze o comunicazioni particolari."></textarea>
+                            <p class="field-error" id="error-guestnotes" aria-live="polite"></p>
+                        </div>
+                    </div>
+
+                    <p class="field-error" id="error-general" aria-live="polite"></p>
+
+                    <button type="submit" class="btn btn-primary btn-submit" id="submit-btn">
+                        <span class="btn-text">Conferma partecipazione</span>
+                        <span class="btn-loader" hidden>Sto registrando la tua risposta...</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="result-card" id="result-card" hidden tabindex="-1"></div>
+        </section>
+    </div>
+</main>
+
+<script src="/js/rsvp.js"></script>
+</body>
+</html>
