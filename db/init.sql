@@ -8,17 +8,21 @@
 -- Tabella principale: una riga per ogni modulo RSVP compilato
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS rsvps (
-    id            SERIAL PRIMARY KEY,
-    first_name    VARCHAR(100) NOT NULL,
-    last_name     VARCHAR(100) NOT NULL,
-    email         VARCHAR(255) NOT NULL,
-    phone         VARCHAR(30)  NOT NULL,
-    notes         TEXT         NOT NULL,
-    attendance    BOOLEAN      NOT NULL,
-    has_guest     BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
+    id                   SERIAL PRIMARY KEY,
+    first_name           VARCHAR(100) NOT NULL,
+    last_name            VARCHAR(100) NOT NULL,
+    email                VARCHAR(255) NOT NULL,
+    phone                VARCHAR(30)  NOT NULL,
+    notes                TEXT         NOT NULL,
+    attendance           BOOLEAN      NOT NULL,
+    has_guest            BOOLEAN      NOT NULL DEFAULT FALSE,
+    last_email_sent_at   TIMESTAMPTZ,
+    created_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at           TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
+
+-- Aggiunta idempotente per database creati con una versione precedente dello schema
+ALTER TABLE rsvps ADD COLUMN IF NOT EXISTS last_email_sent_at TIMESTAMPTZ;
 
 -- ---------------------------------------------------------------------
 -- Accompagnatore: al massimo uno per RSVP (vincolo UNIQUE su rsvp_id)

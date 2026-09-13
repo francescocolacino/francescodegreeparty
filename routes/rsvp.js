@@ -1,5 +1,5 @@
 const express = require('express');
-const { getClient } = require('../config/database');
+const { getClient, query } = require('../config/database');
 const { validateRsvpBody, normalizeNameForCompare } = require('../middleware/validation');
 const { sendConfirmationEmail } = require('../services/emailService');
 
@@ -143,7 +143,11 @@ router.post('/', validateRsvpBody, async (req, res) => {
     }).then((emailResult) => {
         if (!emailResult.sent) {
             console.warn(`[rsvp] RSVP #${rsvpId} salvato correttamente ma l'email di conferma non e' partita (${emailResult.reason}).`);
+            return;
         }
+        query('UPDATE rsvps SET last_email_sent_at = now() WHERE id = $1', [rsvpId]).catch((err) => {
+            console.error(`[rsvp] Errore aggiornamento last_email_sent_at per rsvp #${rsvpId}:`, err.message);
+        });
     }).catch((err) => {
         console.error(`[rsvp] Errore inatteso durante l'invio email per rsvp #${rsvpId}:`, err.message);
     });

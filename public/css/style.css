@@ -937,3 +937,86 @@ table.rsvp-table td.wrap {
     color: var(--text-muted);
     padding: 24px 0;
 }
+
+.modal-box-wide {
+    max-width: 580px;
+    text-align: left;
+    max-height: 88vh;
+    overflow-y: auto;
+}
+
+.modal-box-wide h3 {
+    text-align: center;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--black);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--bordeaux);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger), #7a2a21);
+    color: #fff;
+}
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.action-btn {
+    background: none;
+    border: 1px solid rgba(28, 22, 20, 0.2);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    background: var(--cream-dark);
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-btn-danger {
+    border-color: rgba(161, 58, 47, 0.4);
+    color: var(--danger);
+}
+
+.action-btn-danger:hover {
+    background: rgba(161, 58, 47, 0.08);
+}
+
+.last-sent {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.last-sent-never {
+    font-style: italic;
+}
+
+.rsvp-card-actions {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(28, 22, 20, 0.15);
+}

@@ -67,6 +67,47 @@ router.get('/recipients-count', async (req, res) => {
     }
 });
 
+/**
+ * Invia le email della campagna una alla volta, in background (la richiesta
+ * HTTP e' gia' stata chiusa a questo punto). Il risultato finale viene
+ * salvato in email_campaigns e comparira' nello storico non appena pronto.
+ */
+async function sendCampaignInBackground({ recipients, subject, message, filter }) {
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (const recipient of recipients) {
+        try {
+            // eslint-disable-next-line no-await-in-loop
+            await sendCampaignEmailToRecipient({
+                to: recipient.email,
+                firstName: recipient.firstName,
+                subject,
+                message
+            });
+            successCount += 1;
+        } catch (err) {
+            failureCount += 1;
+            console.error(`[mail] Invio fallito a ${recipient.email}:`, err.message);
+        }
+        if (SEND_DELAY_MS > 0) {
+            // eslint-disable-next-line no-await-in-loop
+            await delay(SEND_DELAY_MS);
+        }
+    }
+
+    try {
+        await query(`
+            INSERT INTO email_campaigns (subject, message, recipient_filter, recipient_count, success_count, failure_count)
+            VALUES ($1, $2, $3, $4, $5, $6)
+        `, [subject, message, filter, recipients.length, successCount, failureCount]);
+    } catch (err) {
+        console.error('[mail] Errore salvataggio storico campagna:', err.message);
+    }
+
+    console.log(`[mail] Campagna completata: ${successCount} inviate, ${failureCount} errori su ${recipients.length}.`);
+}
+
 router.post('/send', async (req, res) => {
     const { recipientFilter, subject, message } = req.body || {};
 
@@ -97,44 +138,26 @@ router.post('/send', async (req, res) => {
         return res.status(500).json({ error: 'Errore durante il recupero dei destinatari.' });
     }
 
-    let successCount = 0;
-    let failureCount = 0;
-
-    // Invio individuale e sequenziale: mai tutti gli indirizzi in un unico
-    // messaggio (to/cc/bcc), per non esporre le email degli altri invitati.
-    for (const recipient of recipients) {
-        try {
-            await sendCampaignEmailToRecipient({
-                to: recipient.email,
-                firstName: recipient.firstName,
-                subject: cleanSubject,
-                message: cleanMessage
-            });
-            successCount += 1;
-        } catch (err) {
-            failureCount += 1;
-            console.error(`[mail] Invio fallito a ${recipient.email}:`, err.message);
-        }
-        if (SEND_DELAY_MS > 0) {
-            // eslint-disable-next-line no-await-in-loop
-            await delay(SEND_DELAY_MS);
-        }
-    }
-
-    try {
-        await query(`
-            INSERT INTO email_campaigns (subject, message, recipient_filter, recipient_count, success_count, failure_count)
-            VALUES ($1, $2, $3, $4, $5, $6)
-        `, [cleanSubject, cleanMessage, filter, recipients.length, successCount, failureCount]);
-    } catch (err) {
-        console.error('[mail] Errore salvataggio storico campagna:', err.message);
-    }
-
-    return res.status(200).json({
-        total: recipients.length,
-        sent: successCount,
-        failed: failureCount
+    // La richiesta HTTP risponde subito: un SMTP lento non deve far restare
+    // il pannello admin in attesa (e rischiare un timeout del proxy). L'invio
+    // vero e proprio, e il salvataggio dello storico, avvengono in background.
+    res.status(202).json({
+        started: true,
+        total: recipients.length
     });
+
+    if (recipients.length > 0) {
+        sendCampaignInBackground({ recipients, subject: cleanSubject, message: cleanMessage, filter }).catch((err) => {
+            console.error('[mail] Errore inatteso durante l\'invio della campagna:', err.message);
+        });
+    } else {
+        query(`
+            INSERT INTO email_campaigns (subject, message, recipient_filter, recipient_count, success_count, failure_count)
+            VALUES ($1, $2, $3, 0, 0, 0)
+        `, [cleanSubject, cleanMessage, filter]).catch((err) => {
+            console.error('[mail] Errore salvataggio storico campagna (0 destinatari):', err.message);
+        });
+    }
 });
 
 router.get('/history', async (req, res) => {

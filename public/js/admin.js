@@ -27,7 +27,21 @@
     var confirmModalConfirm = document.getElementById('confirm-modal-confirm');
     var confirmModalCancel = document.getElementById('confirm-modal-cancel');
 
+    var editModal = document.getElementById('edit-modal');
+    var editForm = document.getElementById('edit-form');
+    var editCancel = document.getElementById('edit-cancel');
+    var editSave = document.getElementById('edit-save');
+    var editError = document.getElementById('edit-error');
+    var editHasGuest = document.getElementById('edit-hasGuest');
+    var editGuestFields = document.getElementById('edit-guest-fields');
+
+    var deleteModal = document.getElementById('delete-modal');
+    var deleteCancel = document.getElementById('delete-cancel');
+    var deleteConfirm = document.getElementById('delete-confirm');
+
     var pendingCampaignPayload = null;
+    var pendingDeleteId = null;
+    var currentRsvps = [];
 
     /* ------------------------------------------------------------------
        Vista: login / dashboard / caricamento
@@ -166,6 +180,7 @@
             .then(function (data) {
                 loadingEl.hidden = true;
                 var rsvps = data.rsvps || [];
+                currentRsvps = rsvps;
 
                 if (rsvps.length === 0) {
                     emptyEl.hidden = false;
@@ -191,6 +206,10 @@
         } catch (e) {
             return iso;
         }
+    }
+
+    function formatLastSent(iso) {
+        return iso ? formatDate(iso) : 'Mai inviata';
     }
 
     function el(tag, opts) {
@@ -230,6 +249,28 @@
         return box;
     }
 
+    /**
+     * Crea i tre bottoni azione (Modifica / Elimina / Reinvia mail)
+     * condivisi da tabella desktop e card mobile.
+     */
+    function buildActionButtons(rsvp) {
+        var wrap = el('div', { className: 'action-buttons' });
+
+        var editBtn = el('button', { text: 'Modifica', className: 'action-btn', attrs: { type: 'button' } });
+        editBtn.addEventListener('click', function () { openEditModal(rsvp.id); });
+
+        var resendBtn = el('button', { text: 'Reinvia mail', className: 'action-btn', attrs: { type: 'button' } });
+        resendBtn.addEventListener('click', function () { handleResend(rsvp.id, resendBtn); });
+
+        var deleteBtn = el('button', { text: 'Elimina', className: 'action-btn action-btn-danger', attrs: { type: 'button' } });
+        deleteBtn.addEventListener('click', function () { openDeleteModal(rsvp.id, rsvp.firstName + ' ' + rsvp.lastName); });
+
+        wrap.appendChild(editBtn);
+        wrap.appendChild(resendBtn);
+        wrap.appendChild(deleteBtn);
+        return wrap;
+    }
+
     function renderRsvpTable(rsvps) {
         var tbody = document.getElementById('rsvp-tbody');
         tbody.textContent = '';
@@ -263,7 +304,7 @@
 
                 detailRow = el('tr', { className: 'guest-detail-row' });
                 detailRow.hidden = true;
-                var detailTd = el('td', { attrs: { colspan: '9' } });
+                var detailTd = el('td', { attrs: { colspan: '11' } });
                 detailTd.appendChild(guestDetailFragment(r.guest));
                 detailRow.appendChild(detailTd);
 
@@ -276,8 +317,17 @@
             } else {
                 guestTd.appendChild(document.createTextNode('—'));
             }
-
             tr.appendChild(guestTd);
+
+            tr.appendChild(el('td', {
+                text: formatLastSent(r.lastEmailSentAt),
+                className: 'last-sent' + (r.lastEmailSentAt ? '' : ' last-sent-never')
+            }));
+
+            var actionsTd = el('td');
+            actionsTd.appendChild(buildActionButtons(r));
+            tr.appendChild(actionsTd);
+
             tbody.appendChild(tr);
             if (detailRow) tbody.appendChild(detailRow);
         });
@@ -306,6 +356,7 @@
             addRow('Telefono', r.phone);
             addRow('Email', r.email);
             addRow('Note', r.notes);
+            addRow('Ultimo invio', formatLastSent(r.lastEmailSentAt));
             card.appendChild(dl);
 
             if (r.hasGuest && r.guest) {
@@ -313,8 +364,204 @@
                 card.appendChild(guestDetailFragment(r.guest));
             }
 
+            var actionsWrap = el('div', { className: 'rsvp-card-actions' });
+            actionsWrap.appendChild(buildActionButtons(r));
+            card.appendChild(actionsWrap);
+
             container.appendChild(card);
         });
+    }
+
+    /* ------------------------------------------------------------------
+       Modifica adesione
+       ------------------------------------------------------------------ */
+    function findRsvpById(id) {
+        for (var i = 0; i < currentRsvps.length; i++) {
+            if (currentRsvps[i].id === id) return currentRsvps[i];
+        }
+        return null;
+    }
+
+    function setEditGuestFieldsRequired(required) {
+        ['edit-guestFirstName', 'edit-guestLastName', 'edit-guestPhone', 'edit-guestEmail'].forEach(function (id) {
+            var input = document.getElementById(id);
+            if (!input) return;
+            if (required) input.setAttribute('required', 'required');
+            else input.removeAttribute('required');
+        });
+    }
+
+    editHasGuest.addEventListener('change', function () {
+        editGuestFields.hidden = !editHasGuest.checked;
+        setEditGuestFieldsRequired(editHasGuest.checked);
+        if (!editHasGuest.checked) {
+            ['edit-guestFirstName', 'edit-guestLastName', 'edit-guestPhone', 'edit-guestEmail', 'edit-guestNotes'].forEach(function (id) {
+                var input = document.getElementById(id);
+                if (input) input.value = '';
+            });
+        }
+    });
+
+    function openEditModal(id) {
+        var rsvp = findRsvpById(id);
+        if (!rsvp) return;
+
+        editError.textContent = '';
+        document.getElementById('edit-id').value = String(rsvp.id);
+        document.getElementById('edit-attendance').value = rsvp.attendance ? 'true' : 'false';
+        document.getElementById('edit-firstName').value = rsvp.firstName || '';
+        document.getElementById('edit-lastName').value = rsvp.lastName || '';
+        document.getElementById('edit-phone').value = rsvp.phone || '';
+        document.getElementById('edit-email').value = rsvp.email || '';
+        document.getElementById('edit-notes').value = rsvp.notes || '';
+
+        var hasGuest = Boolean(rsvp.hasGuest && rsvp.guest);
+        editHasGuest.checked = hasGuest;
+        editGuestFields.hidden = !hasGuest;
+        setEditGuestFieldsRequired(hasGuest);
+
+        document.getElementById('edit-guestFirstName').value = hasGuest ? rsvp.guest.firstName || '' : '';
+        document.getElementById('edit-guestLastName').value = hasGuest ? rsvp.guest.lastName || '' : '';
+        document.getElementById('edit-guestPhone').value = hasGuest ? rsvp.guest.phone || '' : '';
+        document.getElementById('edit-guestEmail').value = hasGuest ? rsvp.guest.email || '' : '';
+        document.getElementById('edit-guestNotes').value = hasGuest ? rsvp.guest.notes || '' : '';
+
+        editModal.hidden = false;
+    }
+
+    function closeEditModal() {
+        editModal.hidden = true;
+        editForm.reset();
+    }
+
+    editCancel.addEventListener('click', closeEditModal);
+    editModal.addEventListener('click', function (e) {
+        if (e.target === editModal) closeEditModal();
+    });
+
+    editForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        editError.textContent = '';
+
+        var id = document.getElementById('edit-id').value;
+        var hasGuest = editHasGuest.checked;
+
+        var payload = {
+            attendance: document.getElementById('edit-attendance').value === 'true',
+            firstName: document.getElementById('edit-firstName').value,
+            lastName: document.getElementById('edit-lastName').value,
+            email: document.getElementById('edit-email').value,
+            phone: document.getElementById('edit-phone').value,
+            notes: document.getElementById('edit-notes').value,
+            hasGuest: hasGuest
+        };
+
+        if (hasGuest) {
+            payload.guest = {
+                firstName: document.getElementById('edit-guestFirstName').value,
+                lastName: document.getElementById('edit-guestLastName').value,
+                email: document.getElementById('edit-guestEmail').value,
+                phone: document.getElementById('edit-guestPhone').value,
+                notes: document.getElementById('edit-guestNotes').value
+            };
+        }
+
+        setButtonLoading(editSave, true);
+
+        adminFetch('/api/admin/rsvps/' + encodeURIComponent(id), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
+            .then(function (result) {
+                setButtonLoading(editSave, false);
+                if (result.status === 200) {
+                    closeEditModal();
+                    loadRsvps();
+                    loadStats();
+                } else {
+                    editError.textContent = (result.body && result.body.error) || 'Errore durante il salvataggio.';
+                }
+            })
+            .catch(function (err) {
+                setButtonLoading(editSave, false);
+                if (err.message !== 'unauthorized') {
+                    editError.textContent = 'Errore di connessione. Riprova.';
+                }
+            });
+    });
+
+    /* ------------------------------------------------------------------
+       Elimina adesione
+       ------------------------------------------------------------------ */
+    function openDeleteModal(id, label) {
+        pendingDeleteId = id;
+        var textEl = document.getElementById('delete-modal-text');
+        textEl.textContent = 'Stai per eliminare definitivamente l\'adesione di ' + label + ' (e l\'eventuale accompagnatore). Questa azione e\' irreversibile.';
+        deleteModal.hidden = false;
+        deleteConfirm.focus();
+    }
+
+    function closeDeleteModal() {
+        deleteModal.hidden = true;
+        pendingDeleteId = null;
+    }
+
+    deleteCancel.addEventListener('click', closeDeleteModal);
+    deleteModal.addEventListener('click', function (e) {
+        if (e.target === deleteModal) closeDeleteModal();
+    });
+
+    deleteConfirm.addEventListener('click', function () {
+        if (!pendingDeleteId) {
+            closeDeleteModal();
+            return;
+        }
+        var id = pendingDeleteId;
+        deleteConfirm.disabled = true;
+
+        adminFetch('/api/admin/rsvps/' + encodeURIComponent(id), { method: 'DELETE' })
+            .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
+            .then(function (result) {
+                deleteConfirm.disabled = false;
+                closeDeleteModal();
+                if (result.status === 200) {
+                    loadRsvps();
+                    loadStats();
+                }
+            })
+            .catch(function () {
+                deleteConfirm.disabled = false;
+                closeDeleteModal();
+            });
+    });
+
+    /* ------------------------------------------------------------------
+       Reinvia email di conferma
+       ------------------------------------------------------------------ */
+    function handleResend(id, btn) {
+        btn.disabled = true;
+        var originalText = btn.textContent;
+        btn.textContent = 'Invio...';
+
+        adminFetch('/api/admin/rsvps/' + encodeURIComponent(id) + '/resend-email', { method: 'POST' })
+            .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
+            .then(function (result) {
+                if (result.status === 200) {
+                    loadRsvps();
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Errore, riprova';
+                    setTimeout(function () { btn.textContent = originalText; }, 3000);
+                }
+            })
+            .catch(function (err) {
+                if (err.message === 'unauthorized') return;
+                btn.disabled = false;
+                btn.textContent = 'Errore, riprova';
+                setTimeout(function () { btn.textContent = originalText; }, 3000);
+            });
     }
 
     /* ------------------------------------------------------------------
@@ -383,29 +630,51 @@
     function sendCampaign(payload) {
         setButtonLoading(campaignSubmit, true);
 
-        adminFetch('/api/admin/email/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
-            .then(function (result) {
-                setButtonLoading(campaignSubmit, false);
-                if (result.status === 200) {
-                    showCampaignResult('Email inviate: ' + result.body.sent + ' — Errori: ' + result.body.failed, false);
-                    campaignForm.reset();
-                    campaignCharcount.textContent = '0';
-                    loadHistory();
-                } else {
-                    showCampaignResult((result.body && result.body.error) || 'Errore durante l\'invio.', true);
-                }
+        loadHistory(true).then(function (previousCount) {
+            var baseline = previousCount || 0;
+
+            return adminFetch('/api/admin/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
-            .catch(function (err) {
-                setButtonLoading(campaignSubmit, false);
-                if (err.message !== 'unauthorized') {
-                    showCampaignResult('Errore di connessione durante l\'invio.', true);
+                .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
+                .then(function (result) {
+                    setButtonLoading(campaignSubmit, false);
+                    if (result.status === 202) {
+                        var total = result.body.total || 0;
+                        showCampaignResult(
+                            total > 0
+                                ? 'Invio avviato per ' + total + ' ' + (total === 1 ? 'persona' : 'persone') + '. Il risultato comparira\' a breve nello storico qui sotto.'
+                                : 'Nessun destinatario trovato per questo filtro.',
+                            false
+                        );
+                        campaignForm.reset();
+                        campaignCharcount.textContent = '0';
+                        if (total > 0) pollHistoryAfterSend(baseline);
+                    } else {
+                        showCampaignResult((result.body && result.body.error) || 'Errore durante l\'invio.', true);
+                    }
+                });
+        }).catch(function (err) {
+            setButtonLoading(campaignSubmit, false);
+            if (err.message !== 'unauthorized') {
+                showCampaignResult('Errore di connessione durante l\'invio.', true);
+            }
+        });
+    }
+
+    function pollHistoryAfterSend(previousCount) {
+        var attempts = 0;
+        var maxAttempts = 12;
+        var interval = setInterval(function () {
+            attempts++;
+            loadHistory(true).then(function (count) {
+                if ((count !== null && count > previousCount) || attempts >= maxAttempts) {
+                    clearInterval(interval);
                 }
             });
+        }, 4000);
     }
 
     function showCampaignResult(message, isError) {
@@ -423,27 +692,31 @@
     /* ------------------------------------------------------------------
        Storico comunicazioni
        ------------------------------------------------------------------ */
-    function loadHistory() {
+    function loadHistory(quiet) {
         var loadingEl = document.getElementById('history-loading');
         var emptyEl = document.getElementById('history-empty');
         var listEl = document.getElementById('history-list');
 
-        loadingEl.hidden = false;
-        emptyEl.hidden = true;
-        listEl.hidden = true;
-        listEl.textContent = '';
+        if (!quiet) {
+            loadingEl.hidden = false;
+            emptyEl.hidden = true;
+            listEl.hidden = true;
+        }
 
-        adminFetch('/api/admin/email/history')
+        return adminFetch('/api/admin/email/history')
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 loadingEl.hidden = true;
                 var campaigns = data.campaigns || [];
+                listEl.textContent = '';
 
                 if (campaigns.length === 0) {
                     emptyEl.hidden = false;
-                    return;
+                    listEl.hidden = true;
+                    return campaigns.length;
                 }
 
+                emptyEl.hidden = true;
                 campaigns.forEach(function (c) {
                     var item = el('div', { className: 'history-item' });
 
@@ -465,9 +738,11 @@
                 });
 
                 listEl.hidden = false;
+                return campaigns.length;
             })
             .catch(function () {
                 loadingEl.hidden = true;
+                return null;
             });
     }
 

@@ -88,6 +88,8 @@
                             <th>Email</th>
                             <th>Note</th>
                             <th>Accompagnatore</th>
+                            <th>Ultimo invio</th>
+                            <th>Azioni</th>
                         </tr>
                     </thead>
                     <tbody id="rsvp-tbody"></tbody>
@@ -135,6 +137,102 @@
         </section>
 
     </main>
+</div>
+
+<!-- ==================== MODAL MODIFICA ADESIONE ==================== -->
+<div class="modal-overlay" id="edit-modal" hidden role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="modal-box modal-box-wide">
+        <h3 id="edit-modal-title">Modifica adesione</h3>
+        <form id="edit-form">
+            <input type="hidden" id="edit-id">
+
+            <div class="form-row">
+                <label for="edit-attendance">Presenza</label>
+                <select id="edit-attendance">
+                    <option value="true">Presente</option>
+                    <option value="false">Assente</option>
+                </select>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label for="edit-firstName">Nome</label>
+                    <input type="text" id="edit-firstName" maxlength="100" required>
+                </div>
+                <div class="field">
+                    <label for="edit-lastName">Cognome</label>
+                    <input type="text" id="edit-lastName" maxlength="100" required>
+                </div>
+                <div class="field">
+                    <label for="edit-phone">Telefono</label>
+                    <input type="tel" id="edit-phone" maxlength="30" required>
+                </div>
+                <div class="field">
+                    <label for="edit-email">Email</label>
+                    <input type="email" id="edit-email" maxlength="255" required>
+                </div>
+            </div>
+            <div class="field">
+                <label for="edit-notes">Note / allergie</label>
+                <textarea id="edit-notes" rows="2" maxlength="1000" required></textarea>
+            </div>
+
+            <div class="form-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="edit-hasGuest">
+                    Ha un accompagnatore
+                </label>
+            </div>
+
+            <div id="edit-guest-fields" hidden>
+                <h4 class="guest-title">Dati accompagnatore</h4>
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="edit-guestFirstName">Nome</label>
+                        <input type="text" id="edit-guestFirstName" maxlength="100">
+                    </div>
+                    <div class="field">
+                        <label for="edit-guestLastName">Cognome</label>
+                        <input type="text" id="edit-guestLastName" maxlength="100">
+                    </div>
+                    <div class="field">
+                        <label for="edit-guestPhone">Telefono</label>
+                        <input type="tel" id="edit-guestPhone" maxlength="30">
+                    </div>
+                    <div class="field">
+                        <label for="edit-guestEmail">Email</label>
+                        <input type="email" id="edit-guestEmail" maxlength="255">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="edit-guestNotes">Note / allergie accompagnatore</label>
+                    <textarea id="edit-guestNotes" rows="2" maxlength="1000"></textarea>
+                </div>
+            </div>
+
+            <p class="field-error" id="edit-error" role="alert" aria-live="polite"></p>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="edit-cancel">Annulla</button>
+                <button type="submit" class="btn btn-primary" id="edit-save">
+                    <span class="btn-text">Salva modifiche</span>
+                    <span class="btn-loader" hidden>Salvataggio...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== MODAL CONFERMA ELIMINAZIONE ==================== -->
+<div class="modal-overlay" id="delete-modal" hidden role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-box">
+        <h3 id="delete-modal-title">Eliminare questa adesione?</h3>
+        <p id="delete-modal-text">Questa azione e' irreversibile: verranno eliminati anche i dati dell'eventuale accompagnatore.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="delete-cancel">Annulla</button>
+            <button type="button" class="btn btn-primary btn-danger" id="delete-confirm">Elimina</button>
+        </div>
+    </div>
 </div>
 
 <!-- ==================== MODAL CONFERMA INVIO ==================== -->
