@@ -24,25 +24,29 @@
         <section class="event-details" aria-label="Dettagli evento">
             <dl class="detail-list">
                 <div class="detail-row">
+                    <span class="detail-icon" aria-hidden="true">📅</span>
                     <dt>Data</dt>
                     <dd id="event-date">—</dd>
                 </div>
                 <div class="detail-row">
+                    <span class="detail-icon" aria-hidden="true">🕑</span>
                     <dt>Ora</dt>
                     <dd id="event-time">—</dd>
                 </div>
                 <div class="detail-row">
+                    <span class="detail-icon" aria-hidden="true">📍</span>
                     <dt>Location</dt>
                     <dd id="event-location">—</dd>
                 </div>
                 <div class="detail-row" id="event-address-row" hidden>
+                    <span class="detail-icon" aria-hidden="true">🏠</span>
                     <dt>Indirizzo</dt>
                     <dd id="event-address">—</dd>
                 </div>
             </dl>
             <p class="event-note" id="event-note" hidden></p>
             <a id="maps-link" class="btn btn-outline" href="#" target="_blank" rel="noopener noreferrer" hidden>
-                Apri su Maps
+                <span aria-hidden="true">🗺️</span> Apri su Maps
             </a>
         </section>
 
@@ -102,7 +106,7 @@
                     </div>
 
                     <fieldset class="choice-fieldset" id="guest-question" hidden>
-                        <legend>Porterai con te il tuo fidanzato, la tua fidanzata o un accompagnatore?</legend>
+                        <legend>Porterai con te il tuo fidanzato o la tua fidanzata?</legend>
                         <div class="choice-group choice-group-inline">
                             <label class="choice-card choice-yes" for="guest-yes">
                                 <input type="radio" id="guest-yes" name="hasGuest" value="yes">
@@ -118,7 +122,7 @@
                     </fieldset>
 
                     <div class="reveal-block" id="guest-fields" hidden>
-                        <h3 class="guest-title">Dati del tuo accompagnatore</h3>
+                        <h3 class="guest-title">Dati del tuo fidanzato o della tua fidanzata</h3>
                         <p class="field-error" id="error-guestGeneral" aria-live="polite"></p>
 
                         <div class="form-grid">

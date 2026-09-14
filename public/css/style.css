@@ -176,40 +176,58 @@ button {
    Dettagli evento
    -------------------------------------------------------------------- */
 .event-details {
-    background: var(--cream-dark);
-    border: 1px solid rgba(201, 162, 75, 0.4);
-    border-radius: var(--radius-md);
-    padding: 22px 20px;
-    margin-bottom: 36px;
+    padding: 0;
+    margin-bottom: 32px;
     text-align: center;
 }
 
 .detail-list {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
-    margin: 0 0 16px;
+    margin: 0 0 20px;
+    padding: 0;
 }
 
-@media (min-width: 480px) {
-    .detail-list {
-        grid-template-columns: 1fr 1fr;
-    }
+.detail-row {
+    flex: 1 1 128px;
+    max-width: 168px;
+    background: linear-gradient(165deg, #ffffff, var(--cream-dark));
+    border: 1px solid rgba(201, 162, 75, 0.45);
+    border-radius: var(--radius-md);
+    padding: 18px 10px 16px;
+    box-shadow: 0 10px 22px -16px rgba(28, 22, 20, 0.4);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.detail-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 26px -16px rgba(28, 22, 20, 0.45);
+}
+
+.detail-icon {
+    display: block;
+    font-size: 23px;
+    line-height: 1;
+    margin-bottom: 8px;
 }
 
 .detail-row dt {
-    font-size: 11px;
-    letter-spacing: 1.5px;
+    font-size: 10.5px;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .detail-row dd {
     margin: 0;
     font-family: var(--font-serif);
-    font-size: 17px;
+    font-size: 16px;
     color: var(--black);
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .event-note {

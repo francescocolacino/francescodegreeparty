@@ -28,8 +28,19 @@ function getEventInfo() {
         time: process.env.EVENT_TIME || '',
         locationName: process.env.EVENT_LOCATION_NAME || '',
         address: process.env.EVENT_ADDRESS || '',
-        note: process.env.EVENT_NOTE || ''
+        note: process.env.EVENT_NOTE || '',
+        mapsUrl: process.env.EVENT_MAPS_URL || ''
     };
+}
+
+/**
+ * Link "Apri su Maps": usa EVENT_MAPS_URL se impostato, altrimenti costruisce
+ * una ricerca Google Maps a partire dall'indirizzo. Nullo se non c'e' ne' l'uno ne' l'altro.
+ */
+function buildMapsUrl(event) {
+    if (event.mapsUrl && /^https?:\/\//i.test(event.mapsUrl)) return event.mapsUrl;
+    if (event.address) return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address)}`;
+    return '';
 }
 
 /**
@@ -110,12 +121,20 @@ function buildConfirmationEmail(rsvp) {
 La tua partecipazione a <strong>${escapeHtml(eventName)}</strong> e\' stata registrata correttamente. Che gioia averti con noi!
 </p>`;
 
+        const mapsUrl = buildMapsUrl(event);
+        let eventInfoLines = `&#128197; <strong>Data:</strong> ${escapeHtml(event.date)}<br>
+&#128343; <strong>Ora:</strong> ${escapeHtml(event.time)}<br>
+&#128205; <strong>Location:</strong> ${escapeHtml(event.locationName)}`;
+        if (event.address) {
+            eventInfoLines += `<br>&#128205; <strong>Indirizzo:</strong> ${escapeHtml(event.address)}`;
+        }
+        if (mapsUrl) {
+            eventInfoLines += `<br>&#128506;&#65039; <strong>Maps:</strong> <a href="${escapeHtml(mapsUrl)}" style="color:${COLORS.bordeaux};">Apri su Google Maps</a>`;
+        }
+
         bodyHtml += `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f0e6;border-radius:8px;margin-bottom:8px;">
 <tr><td style="padding:16px 18px;font-size:14px;line-height:2;">
-&#128197; <strong>Data:</strong> ${escapeHtml(event.date)}<br>
-&#128343; <strong>Ora:</strong> ${escapeHtml(event.time)}<br>
-&#128205; <strong>Location:</strong> ${escapeHtml(event.locationName)}<br>
-&#128205; <strong>Indirizzo:</strong> ${escapeHtml(event.address)}
+${eventInfoLines}
 </td></tr>
 </table>`;
 
