@@ -1,4 +1,4 @@
-const { transporter, getFromHeader, isMailerEnabled } = require('../config/mailer');
+const { sendMail, getFromHeader, isMailerEnabled } = require('../config/mailer');
 
 const COLORS = {
     bordeaux: '#5c1a2b',
@@ -182,7 +182,7 @@ async function sendConfirmationEmail(rsvp) {
 
     try {
         const { subject, html } = buildConfirmationEmail(rsvp);
-        await transporter.sendMail({
+        await sendMail({
             from: getFromHeader(),
             to: rsvp.email,
             subject,
@@ -204,7 +204,7 @@ async function sendCampaignEmailToRecipient({ to, firstName, subject, message })
         throw new Error('mailer_disabled');
     }
     const { subject: finalSubject, html } = buildCampaignEmail({ firstName, subject, message });
-    await transporter.sendMail({
+    await sendMail({
         from: getFromHeader(),
         to,
         subject: finalSubject,

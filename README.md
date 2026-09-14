@@ -4,9 +4,9 @@ Sito per la gestione degli inviti e delle adesioni alla festa di laurea, con
 pagina pubblica per l'RSVP, invio email automatico e pannello amministratore
 per statistiche, elenco invitati e comunicazioni via email.
 
-Stack: Node.js, Express, PostgreSQL (`pg`), HTML/CSS/JS vanilla, Nodemailer
-(Gmail SMTP), `express-session` + `connect-pg-simple`, `bcrypt`, `helmet`,
-`express-rate-limit`. Nessun framework frontend.
+Stack: Node.js, Express, PostgreSQL (`pg`), HTML/CSS/JS vanilla, Gmail API
+per l'invio email, `express-session` + `connect-pg-simple`, `bcrypt`,
+`helmet`, `express-rate-limit`. Nessun framework frontend.
 
 ---
 
@@ -72,24 +72,53 @@ DATABASE_URL=${{Postgres.DATABASE_URL}}
 
 ## 3. Configurazione Gmail (invio email)
 
-L'app usa Gmail via App Password, **mai** la password normale dell'account:
+L'app invia le email tramite la **Gmail API** (HTTPS) e non via SMTP: molte
+piattaforme cloud (Railway incluso, sul piano gratuito) bloccano le porte
+SMTP in uscita, mentre le chiamate HTTPS funzionano sempre. In piu', inviare
+davvero tramite l'infrastruttura Google (anziche' con un provider SMTP
+terzo che finge di essere @gmail.com) evita i blocchi anti-spoofing
+(SPF/DKIM/DMARC) applicati dai principali provider di posta.
 
-1. Attiva la verifica in due passaggi sul tuo account Google
-   (myaccount.google.com/security).
-2. Genera una **Google App Password** dedicata
-   (myaccount.google.com/apppasswords), scegliendo "Altro" come app.
-3. Copia l'indirizzo Gmail in `GMAIL_USER`.
-4. Copia la App Password generata (16 caratteri) in `GOOGLE_APP_PASSWORD`.
+Serve un progetto Google Cloud con OAuth2 configurato (gratuito, richiede
+solo un account Google):
+
+1. Vai su [console.cloud.google.com](https://console.cloud.google.com/) e
+   crea un nuovo progetto (nome a piacere, es. "Festa Laurea").
+2. **Abilita la Gmail API**: menu "API e servizi" → "Libreria" → cerca
+   "Gmail API" → **Abilita**.
+3. **Configura la schermata di consenso OAuth**: "API e servizi" → "Schermata
+   di consenso OAuth" → tipo utente **Esterno** → compila i campi
+   obbligatori (nome app, email di supporto, email sviluppatore) → nella
+   sezione "Utenti di test" aggiungi il tuo indirizzo Gmail (quello che
+   invia le email). Non serve la verifica Google per uso personale.
+4. **Crea le credenziali OAuth**: "API e servizi" → "Credenziali" → "Crea
+   credenziali" → "ID client OAuth" → tipo applicazione **Applicazione web**
+   → in "URI di reindirizzamento autorizzati" aggiungi:
+   `https://developers.google.com/oauthplayground` → Crea. Salva **Client
+   ID** e **Client secret**.
+5. **Genera il refresh token** con [OAuth 2.0 Playground](https://developers.google.com/oauthplayground):
+   - Icona ingranaggio (in alto a destra) → spunta "Use your own OAuth
+     credentials" → incolla Client ID e Client secret.
+   - Nel pannello a sinistra cerca "Gmail API v1", seleziona lo scope
+     `https://www.googleapis.com/auth/gmail.send` → **Authorize APIs**.
+   - Accedi con l'account Gmail che invia le email e concedi il permesso
+     (se compare un avviso "app non verificata", e' normale per un progetto
+     personale: procedi con "Avanzate" → "Vai a [nome app] (non sicuro)").
+   - Torna nel Playground e clicca **Exchange authorization code for
+     tokens**: copia il **Refresh token** mostrato.
+6. Imposta le variabili:
 
 ```
 GMAIL_USER=tuoindirizzo@gmail.com
-GOOGLE_APP_PASSWORD=xxxxxxxxxxxxxxxx
+GOOGLE_CLIENT_ID=xxxxxxxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxxxxxxxxx
+GOOGLE_REFRESH_TOKEN=xxxxxxxxxx
 MAIL_FROM_NAME=Festa di Laurea - Francesco
 ```
 
 Se queste variabili non sono impostate, il server parte comunque (l'invio
 email viene semplicemente disabilitato e loggato come warning): un problema
-SMTP non deve mai impedire il salvataggio delle adesioni.
+di invio non deve mai impedire il salvataggio delle adesioni.
 
 ---
 
@@ -133,13 +162,17 @@ Vedi `.env.example` per l'elenco completo. Riepilogo:
 | `ADMIN_USERNAME` | Username dell'amministratore |
 | `ADMIN_PASSWORD_HASH` | Hash bcrypt della password admin |
 | `GMAIL_USER` | Indirizzo Gmail mittente |
-| `GOOGLE_APP_PASSWORD` | Google App Password (16 caratteri) |
+| `GOOGLE_CLIENT_ID` | Client ID OAuth2 (Google Cloud Console) |
+| `GOOGLE_CLIENT_SECRET` | Client secret OAuth2 |
+| `GOOGLE_REFRESH_TOKEN` | Refresh token OAuth2 (scope `gmail.send`) |
 | `MAIL_FROM_NAME` | Nome mittente mostrato nelle email |
 | `EVENT_NAME` | Nome evento mostrato su sito ed email |
 | `EVENT_DATE` | Data evento (testo libero, es. "26 settembre 2026") |
 | `EVENT_TIME` | Ora evento (es. "18:30") |
 | `EVENT_LOCATION_NAME` | Nome della location |
-| `EVENT_ADDRESS` | Indirizzo completo (usato anche per il link Maps) |
+| `EVENT_ADDRESS` | Indirizzo completo (facoltativo, usato anche per il link Maps se `EVENT_MAPS_URL` non e' impostato) |
+| `EVENT_NOTE` | Nota breve facoltativa mostrata sotto i dettagli evento |
+| `EVENT_MAPS_URL` | Link diretto a Google Maps per il pulsante "Apri su Maps" |
 
 `.env` e' incluso in `.gitignore` e non deve mai essere committato.
 
@@ -155,7 +188,7 @@ Vedi `.env.example` per l'elenco completo. Riepilogo:
 4. Nel servizio dell'app, vai su **Variables** e aggiungi:
    - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (riferimento al servizio Postgres)
    - `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`
-   - `GMAIL_USER`, `GOOGLE_APP_PASSWORD`, `MAIL_FROM_NAME`
+   - `GMAIL_USER`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `MAIL_FROM_NAME`
    - `EVENT_NAME`, `EVENT_DATE`, `EVENT_TIME`, `EVENT_LOCATION_NAME`, `EVENT_ADDRESS`
    - `NODE_ENV=production`
 5. Esegui il deploy (automatico al push, oppure "Deploy" manuale).
@@ -177,7 +210,7 @@ funziona automaticamente con la porta assegnata da Railway.
 ```text
 server.js               Entry point Express
 config/database.js      Pool PostgreSQL (DATABASE_URL)
-config/mailer.js        Transporter Nodemailer (Gmail)
+config/mailer.js        Invio email via Gmail API (OAuth2, HTTPS)
 middleware/adminAuth.js Protezione rotte admin (sessione)
 middleware/validation.js Normalizzazione e validazione RSVP (server-side)
 routes/rsvp.js           POST /api/rsvp (transazione + dedup + email)
